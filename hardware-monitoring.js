@@ -7,18 +7,14 @@ const log = getDebug("hardware");
 
 const getMachineStats = async () => {
   const [cpu, memory] = await Promise.all([
-    (async () => {
-      return cgroup.cpu.calculateUsage(
+    (async () =>
+      cgroup.cpu.calculateUsage(
         cgroup.cpu.usage(),
         await new Promise((resolve) => {
           setTimeout(() => resolve(cgroup.cpu.usage()), 1000);
         })
-      );
-    })(),
-    (async () => {
-      const memory = cgroup.memory();
-      return memory.containerUsagePercentage(await memory.containerUsage());
-    })(),
+      ))(),
+    cgroup.memory.containerUsagePercentage(cgroup.memory.containerUsage()),
   ]).catch((err) => {
     log(`Error checking machine stats`, err);
     return [null, null];
