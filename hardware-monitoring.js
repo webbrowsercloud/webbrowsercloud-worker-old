@@ -6,24 +6,24 @@ const { getDebug } = require("./utils");
 const log = getDebug("hardware");
 
 const getMachineStats = async () => {
-  const [cpu, memory] = await Promise.all([
-    (async () =>
+  try {
+    const cpu =
       cgroup.cpu.calculateUsage(
         cgroup.cpu.usage(),
         await new Promise((resolve) => {
           setTimeout(() => resolve(cgroup.cpu.usage()), 1000);
         })
-      ))(),
-    cgroup.memory.containerUsagePercentage(cgroup.memory.containerUsage()),
-  ]).catch((err) => {
+      ) / 100;
+
+    const memory =
+      cgroup.memory.containerUsagePercentage(cgroup.memory.containerUsage()) /
+      100;
+
+    return { cpu, memory };
+  } catch (err) {
     log(`Error checking machine stats`, err);
     return [null, null];
-  });
-
-  return {
-    cpu,
-    memory,
-  };
+  }
 };
 
 const overloaded = async () => {
